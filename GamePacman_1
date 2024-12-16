@@ -1,0 +1,175 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <windows.h> 
+
+const unsigned int gridWidth = 30;
+const unsigned int gridHeight = 30;
+char grid[gridHeight][gridWidth];
+int pacmanX, pacmanY;
+const int amountOfGhosts = 4;
+int ghostX[amountOfGhosts], ghostY[amountOfGhosts];
+int playerScore = 0;
+bool gameOver = false;
+const char pacmanSymbol = 'P';
+
+void setCursorPosition(int x, int y) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD position = { static_cast<SHORT>(x), static_cast<SHORT>(y) };
+    SetConsoleCursorPosition(hConsole, position);
+}
+
+
+void displayUpdatedConsole() {
+   
+    for (size_t i = 0; i < gridHeight; i++) {
+        for (size_t j = 0; j < gridWidth; j++) {
+            std::cout << grid[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void clearConsole() {
+    system("CLS");  // This clears the screen in Windows
+}
+
+// Draw the grid with walls and food
+void drawGrid() {
+    for (size_t i = 0; i < gridHeight; i++) {
+        for (size_t j = 0; j < gridWidth; j++) {
+            if (i == 0 || j == 0 || i == (gridHeight - 1) || j == (gridWidth - 1)) {
+                grid[i][j] = '#';  
+            }
+            else {
+                grid[i][j] = '.';  
+            }
+        }
+    }
+}
+
+
+void spawnPacman() {
+    do {
+        pacmanX = rand() % (gridWidth - 2) + 1; 
+        pacmanY = rand() % (gridHeight - 2) + 1;
+    } while (grid[pacmanY][pacmanX] == '#' ); 
+
+    grid[pacmanY][pacmanX] = pacmanSymbol;
+}
+
+void updateGrid() {
+    clearConsole();  // Clear the console
+    displayUpdatedConsole();  // Redraw the grid with Pac-Man in its new position
+}
+
+bool MODE = 0;
+
+void changeMode(int inputMode) {
+    MODE = inputMode;
+}
+
+void RedGhost() {
+    
+
+}
+void PinkGhost() {
+
+
+}
+void BlueGhost() {
+    
+   
+}
+void GreenGhost() {
+
+
+}
+
+
+void moveUp() {
+    if (grid[pacmanY-1][pacmanX ] != '#') {
+        grid[pacmanY][pacmanX] = '.';
+        pacmanY -= 1;
+        grid[pacmanY][pacmanX] = pacmanSymbol;
+    }
+    updateGrid();
+}
+void moveDown() {
+    if (grid[pacmanY+1][pacmanX] != '#') {
+        grid[pacmanY][pacmanX] = '.';
+        pacmanY += 1;
+        grid[pacmanY][pacmanX] = pacmanSymbol;
+    }
+    updateGrid();
+}
+void moveLeft() {
+    if (grid[pacmanY][pacmanX - 1] != '#') {
+        grid[pacmanY][pacmanX] = '.';
+        pacmanX -= 1;
+        grid[pacmanY][pacmanX] = pacmanSymbol; 
+    }
+    updateGrid();
+}
+void moveRight() {
+    if (grid[pacmanY][pacmanX+1]!='#') {
+        grid[pacmanY][pacmanX] = '.';
+        pacmanX += 1;
+        grid[pacmanY][pacmanX] = pacmanSymbol;  
+    }
+    updateGrid();
+}
+
+void movePacman() {
+    if (GetAsyncKeyState('W') & 0x8000) {  // W key pressed (up)
+        moveUp();
+    }
+    if (GetAsyncKeyState('S') & 0x8000) {  // S key pressed (down)
+        moveDown();
+    }
+    if (GetAsyncKeyState('A') & 0x8000) {  // A key pressed (left)
+        moveLeft();
+    }
+    if (GetAsyncKeyState('D') & 0x8000) {  // D key pressed (right)
+        moveRight();
+    }
+}
+
+
+void increaseScore(int playerScore) {
+    playerScore += 1;
+}
+void endGame() {
+
+}
+bool checkForCollision(int playerX,int playerY,int ghostX,int ghostY) {
+    if (playerX== ghostX && playerY== ghostY) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+void checkForEnd() {
+    if (checkForCollision) {
+        endGame();
+    }
+}
+void InitializeGame() {
+    srand(time(0));
+    drawGrid();
+    spawnPacman();
+    updateGrid();
+}
+void GameLoop() {
+    while (!gameOver) {
+        movePacman();
+        Sleep(80);
+    }
+}
+
+int main() {
+    InitializeGame();
+    GameLoop();
+    return 0;
+}
