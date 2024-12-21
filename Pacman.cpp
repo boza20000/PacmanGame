@@ -55,6 +55,7 @@ void displayPlayerScore() {
     std::cout << "Score: " << playerScore << "  ";  
 }
 
+//test
 // Function to update the score (just for testing purposes)
 void updateScore(int points) {
     playerScore += points;  // Add points to the player score
