@@ -2,11 +2,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <windows.h> 
+#include <fstream>
 
-
-const size_t gridWidth = 10;
-const size_t gridHeight = 10;
-char grid[gridHeight][gridWidth];
 int pacmanX, pacmanY;
 const size_t amountOfGhosts = 4;
 int ghostX[amountOfGhosts], ghostY[amountOfGhosts];
@@ -22,7 +19,73 @@ const int prizeOfPoint = 0;
 int foodX[foodAmount], foodY[foodAmount];
 bool isRemovable = false;
 
+char** grid = nullptr;
+int widthGrid = 0, heightGrid = 0;
+std::ifstream file("map.txt");
 
+void allocateMemoryForGrid(int rows, int cols) {
+    grid = new char* [rows];
+    for (int i = 0; i < rows; ++i) {
+        grid[i] = new char[cols];
+        for (int j = 0; j < cols; ++j) {
+            grid[i][j] = ' ';
+        }
+    }
+}
+
+void deallocateMemoryForGrid() {
+    if (grid != nullptr) {
+        for (int i = 0; i < heightGrid; i++) {
+            delete[] grid[i];
+        }
+        delete[] grid;
+        grid = nullptr;
+    }
+}
+void ignoreLineTillEnd() {
+    file.ignore(std::streamsize(INT_MAX), '\n'); // Skip to the next line
+}
+
+void loadFileMap() {
+    if (!file) {
+        std::cerr << "Error: Could not open file" << std::endl;
+        return;
+    }
+    for (int row = 0; row < heightGrid; row++) {
+        for (int col = 0; col < widthGrid; col++) {
+            char ch;
+            if (file.get(ch)) {
+                grid[row][col] = ch;
+            }
+        }
+        ignoreLineTillEnd();
+    }
+    file.close();
+}
+
+
+void displayMap() {
+    for (int i = 0; i < heightGrid; ++i) {
+        for (int j = 0; j < widthGrid; ++j) {
+            std::cout << grid[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void start() {
+    std::cout << "Enter grid width: ";
+    std::cin >> widthGrid;
+    std::cout << "Enter grid height: ";
+    std::cin >> heightGrid;
+
+    if (widthGrid <= 0 || heightGrid <= 0) {
+        std::cerr << "Error: Grid dimensions must be positive integers under 50(incl.)" << std::endl;
+        std::exit(1);
+    }
+
+    allocateMemoryForGrid(heightGrid, widthGrid);
+}
 
 void setCursorPosition(int x, int y) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -51,7 +114,7 @@ void waitForEnd() {
     }
 }
 void displayPlayerScore() {
-    setCursorPosition( gridWidth*2  , gridHeight / 2);
+    setCursorPosition(widthGrid *2  , heightGrid / 2);
     std::cout << "Score: " << playerScore << "  ";  
 }
 
@@ -98,8 +161,8 @@ void spawnFood() {
         int foodYCur = 0;
         int foodXCur = 0;
         do {  
-            foodYCur = rand() % (gridHeight - 2) + 1; 
-            foodXCur = rand() % (gridWidth - 2) + 1;
+            foodYCur = rand() % (heightGrid - 2) + 1; 
+            foodXCur = rand() % (widthGrid - 2) + 1;
         } while (grid[foodYCur][foodXCur] != pointSymbol); 
         foodX[i] = foodXCur;
         foodY[i] = foodYCur;
@@ -120,26 +183,26 @@ void setScreenSize() {
     //create a function that handels big matrix (consol handles to 30x30)
 }
 
-void drawGrid() {
-    for (size_t i = 0; i < gridHeight; i++) {
-        for (size_t j = 0; j < gridWidth; j++) {
-           
-            if (i == 0 || j == 0 || i == (gridHeight - 1) || j == (gridWidth - 1)) {
-                grid[i][j] = wallSymbol;
-            }
-            else {
-                grid[i][j] = pointSymbol;
-            }
-            std::cout << grid[i][j] << " "; 
-        }
-        std::cout << std::endl; 
-    }
-}
+//void drawGrid() {
+//    for (size_t i = 0; i < gridHeight; i++) {
+//        for (size_t j = 0; j < gridWidth; j++) {
+//           
+//            if (i == 0 || j == 0 || i == (gridHeight - 1) || j == (gridWidth - 1)) {
+//                grid[i][j] = wallSymbol;
+//            }
+//            else {
+//                grid[i][j] = pointSymbol;
+//            }
+//            std::cout << grid[i][j] << " "; 
+//        }
+//        std::cout << std::endl; 
+//    }
+//}
 
 void spawnPacman() {
     do {
-        pacmanX = rand() % (gridWidth - 2) + 1;
-        pacmanY = rand() % (gridHeight - 2) + 1;
+        pacmanX = rand() % (widthGrid - 2) + 1;
+        pacmanY = rand() % (heightGrid - 2) + 1;
     } while (grid[pacmanY][pacmanX] == wallSymbol);
 
     grid[pacmanY][pacmanX] = pacmanSymbol;
@@ -256,9 +319,9 @@ void movePacman() {
 void InitializeGame() {
     hideCursor();
     srand(time(0));
-    drawGrid();
-    spawnPacman();
-    spawnFood();
+    
+   // spawnPacman();
+   // spawnFood();
 }
 
 void GameLoop() {
